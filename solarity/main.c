@@ -94,10 +94,7 @@ int main(void)
 			GPIO_PIN5 | GPIO_PIN6 | GPIO_PIN7, GPIO_PRIMARY_MODULE_FUNCTION);
 	GPIO_setAsOutputPin(GPIO_PORT_P5, GPIO_PIN0); //CS PIN
 	GPIO_setAsOutputPin(GPIO_PORT_P3, GPIO_PIN6); //EN PIN
-	GPIO_setAsInputPin(GPIO_PORT_P5, GPIO_PIN2); // \BUSY pin
-
-	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0);
-	GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN6);
+	GPIO_setAsInputPin(GPIO_PORT_P5, GPIO_PIN2); // BUSY pin
 
 	/* Configuring SPI in 3-wire master mode & enabling it & interrupts */
 	SPI_initMaster(EUSCI_B0_MODULE, &spiMasterConfig);
@@ -106,15 +103,24 @@ int main(void)
 	Interrupt_enableInterrupt(INT_EUSCIB0);
 //	Interrupt_enableSleepOnIsrExit();
 
-	/* Delay  */
-	for(ii=0;ii<10000;ii++);
+	/* Begin Initialization, first set CS and EN inactive */
+	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
+	GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN6); //EN
 
-	GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN6);
-	//while(!(GPIO_getInputPinValue(GPIO_PORT_P5, GPIO_PIN2))) //Wait for BUSY rising edge
-	for(ii=0;ii<10000;ii++);
-	GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN0);
+	/* Activate EN */
+	GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN6); //EN
 
-	/* SPI, put CS low P5.0 and polling to see if the TX buffer is ready or busy */
+	/* Delay 3ms(T_startup) then wait for busy signal to rise (T_init)  */
+	//for(ii=0;ii<10000;ii++);
+	__delay_cycles(158000); //3ms @ 48Mhz = 144000 cycles
+	while(!(GPIO_getInputPinValue(GPIO_PORT_P5, GPIO_PIN2))); //Wait for BUSY rising edge
+
+	/* Begin command, activate CS */
+	GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
+	/* 6.0us (T_S) between CS low and first bit */
+	__delay_cycles(320); //6us @ 48Mhz = 288 cycles
+
+	/* SPI command transfer, polling to see if the TX buffer is ready or busy */
 	TXData = 0x24;
 	while (!(SPI_getInterruptStatus(EUSCI_B0_MODULE,EUSCI_B_SPI_TRANSMIT_INTERRUPT)));
 	SPI_transmitData(EUSCI_B0_MODULE, TXData);
@@ -125,13 +131,20 @@ int main(void)
 	while (!(SPI_getInterruptStatus(EUSCI_B0_MODULE,EUSCI_B_SPI_TRANSMIT_INTERRUPT)));
 	SPI_transmitData(EUSCI_B0_MODULE, TXData);
 
-	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0);
+	/* SPI Command Transfer complete, 11us (T_E) delay before CS high (inactive) */
+	__delay_cycles(560); //11us @ 48Mhz = 528 cycles
+	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
 
-	/* Delaying waiting for the slave to have response */
-	for(ii=0;ii<10000;ii++);
+	/* TCM is busy processing command. Wait for T_A + min T_BUSY = 26us, then wait for busy signal to deactivate, then wait T_NS 2us */
+	__delay_cycles(1300); //26us @ 48Mhz = 1248 cycles
+	while(!(GPIO_getInputPinValue(GPIO_PORT_P5, GPIO_PIN2))); //BUSY
+	__delay_cycles(120); //2us @ 48Mhz = 96 cycles
 
-	GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN0);
+	/* After command processing, receive response. Activate CS then wait before sending initial bit (T_S) */
+	GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
+	__delay_cycles(320); //6us @ 48Mhz = 288 cycles
 
+	/* Send dummy bits, while receiving response */
 	TXData = 0x00;
 	while (!(SPI_getInterruptStatus(EUSCI_B0_MODULE,EUSCI_B_SPI_TRANSMIT_INTERRUPT)));
 	SPI_transmitData(EUSCI_B0_MODULE, TXData);
@@ -139,6 +152,8 @@ int main(void)
 	while (!(SPI_getInterruptStatus(EUSCI_B0_MODULE,EUSCI_B_SPI_TRANSMIT_INTERRUPT)));
 	SPI_transmitData(EUSCI_B0_MODULE, TXData);
 
+	/* Response received, deactivate CS after T_E (11us), communication finished */
+	__delay_cycles(560); //11us @ 48Mhz = 528 cycles
 	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0);
 
     while(1)
@@ -163,7 +178,6 @@ void euscib0_isr(void)
         if ((i > 5) && (i % 9) == 0) {
              for( ii=0;ii<10;ii++);
              i = 0;
-             //GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0);
         }
 
     }

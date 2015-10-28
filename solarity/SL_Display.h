@@ -9,7 +9,7 @@
 #define SOLARITY_SL_DISPLAY_H_
 
 
-void SL_transferByte(uint8_t);
+void SL_D_init();
 
 
 #endif /* SOLARITY_SL_DISPLAY_H_ */

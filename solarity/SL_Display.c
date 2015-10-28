@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-void SL_transferByte(uint8_t TXByte)
+void SL_D_init()
 {
 
 }
