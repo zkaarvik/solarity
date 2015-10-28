@@ -1,6 +1,6 @@
 /*
  * -------------------------------------------
- *    MSP432 DriverLib - v2_20_00_08 
+ *    MSP432 DriverLib - v2_20_00_08
  * -------------------------------------------
  *
  * --COPYRIGHT--,BSD,BSD
@@ -49,7 +49,7 @@
  *            |                  |
  *            |                  |
  *            |                  |
- * Author: 
+ * Author:
 *******************************************************************************/
 /* DriverLib Includes */
 #include "driverlib.h"
@@ -69,13 +69,13 @@ static uint8_t ii = 0;
 /* SPI Master Configuration Parameter */
 const eUSCI_SPI_MasterConfig spiMasterConfig =
 {
-		EUSCI_B_SPI_CLOCKSOURCE_SMCLK,                // ACLK Clock Source
-        24000000,                                     // ACLK = LFXT = 32.768khz
-		2000000,                                    // SPICLK = 500khz
-		EUSCI_B_SPI_MSB_FIRST,                       // MSB First
+		EUSCI_B_SPI_CLOCKSOURCE_SMCLK,                	// SMCLK Clock Source
+        24000000,                                     	// SMCLK = 24Mhz
+		2000000,                                    	// SPICLK = 2MHz
+		EUSCI_B_SPI_MSB_FIRST,                       	// MSB First
 		EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT,    // Phase
-		EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW,    // Polarity
-		EUSCI_B_SPI_3PIN                             // 3Wire SPI Mode
+		EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW,    	// Polarity
+		EUSCI_B_SPI_3PIN                             	// 3Wire SPI Mode
 };
 
 int main(void)

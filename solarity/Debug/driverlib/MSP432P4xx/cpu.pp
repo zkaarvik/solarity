@@ -1,7 +1,7 @@
 # FIXED
 
 driverlib/MSP432P4xx/cpu.obj: ../driverlib/MSP432P4xx/cpu.c
-driverlib/MSP432P4xx/cpu.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/cpu.h
+driverlib/MSP432P4xx/cpu.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/cpu.h
 driverlib/MSP432P4xx/cpu.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdint.h
 driverlib/MSP432P4xx/cpu.obj: C:/ti/ccsv6/ccs_base/arm/include/msp.h
 driverlib/MSP432P4xx/cpu.obj: C:/ti/ccsv6/ccs_base/arm/include/msp432p401r.h
@@ -13,7 +13,7 @@ driverlib/MSP432P4xx/cpu.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc
 driverlib/MSP432P4xx/cpu.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h
 
 ../driverlib/MSP432P4xx/cpu.c: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/cpu.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/cpu.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdint.h: 
 C:/ti/ccsv6/ccs_base/arm/include/msp.h: 
 C:/ti/ccsv6/ccs_base/arm/include/msp432p401r.h: 

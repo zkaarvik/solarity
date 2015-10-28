@@ -1,7 +1,7 @@
 # FIXED
 
 driverlib/MSP432P4xx/uart.obj: ../driverlib/MSP432P4xx/uart.c
-driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/uart.h
+driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/uart.h
 driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdint.h
 driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdbool.h
 driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/yvals.h
@@ -16,12 +16,12 @@ driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.h
 driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h
 driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h
 driverlib/MSP432P4xx/uart.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h
-driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/eusci.h
-driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/interrupt.h
-driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/debug.h
+driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/eusci.h
+driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/interrupt.h
+driverlib/MSP432P4xx/uart.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/debug.h
 
 ../driverlib/MSP432P4xx/uart.c: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/uart.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/uart.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdint.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdbool.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/yvals.h: 
@@ -36,6 +36,6 @@ C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.h:
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h: 
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h: 
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/eusci.h: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/interrupt.h: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/debug.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/eusci.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/interrupt.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/debug.h: 

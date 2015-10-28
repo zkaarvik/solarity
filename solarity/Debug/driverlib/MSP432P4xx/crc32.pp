@@ -11,7 +11,7 @@ driverlib/MSP432P4xx/crc32.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.
 driverlib/MSP432P4xx/crc32.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h
 driverlib/MSP432P4xx/crc32.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h
 driverlib/MSP432P4xx/crc32.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h
-driverlib/MSP432P4xx/crc32.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/debug.h
+driverlib/MSP432P4xx/crc32.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/debug.h
 
 ../driverlib/MSP432P4xx/crc32.c: 
 ../driverlib/MSP432P4xx/crc32.h: 
@@ -24,4 +24,4 @@ C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.h:
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h: 
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h: 
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/debug.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/debug.h: 

@@ -45,7 +45,7 @@ ORDERED_OBJS += \
 "../driverlib/MSP432P4xx/ccs/msp432p4xx_driverlib.lib" \
 $(GEN_CMDS__FLAG) \
 -l"libc.a" \
--l"C:\Users\Zach\workspace_v6_1\solarity\msp432p4xx_driverlib.lib" \
+-l"C:\Users\Zach\git\solarity\solarity\msp432p4xx_driverlib.lib" \
 
 -include ../makefile.init
 

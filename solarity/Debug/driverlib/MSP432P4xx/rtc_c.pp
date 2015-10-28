@@ -1,7 +1,7 @@
 # FIXED
 
 driverlib/MSP432P4xx/rtc_c.obj: ../driverlib/MSP432P4xx/rtc_c.c
-driverlib/MSP432P4xx/rtc_c.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/rtc_c.h
+driverlib/MSP432P4xx/rtc_c.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/rtc_c.h
 driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdint.h
 driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdbool.h
 driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/yvals.h
@@ -16,11 +16,11 @@ driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.
 driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h
 driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h
 driverlib/MSP432P4xx/rtc_c.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h
-driverlib/MSP432P4xx/rtc_c.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/interrupt.h
-driverlib/MSP432P4xx/rtc_c.obj: C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/debug.h
+driverlib/MSP432P4xx/rtc_c.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/interrupt.h
+driverlib/MSP432P4xx/rtc_c.obj: C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/debug.h
 
 ../driverlib/MSP432P4xx/rtc_c.c: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/rtc_c.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/rtc_c.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdint.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/stdbool.h: 
 C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include/yvals.h: 
@@ -35,5 +35,5 @@ C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.h:
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h: 
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h: 
 C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4_simd.h: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/interrupt.h: 
-C:/Users/Zach/workspace_v6_1/solarity/driverlib/MSP432P4xx/debug.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/interrupt.h: 
+C:/Users/Zach/git/solarity/solarity/driverlib/MSP432P4xx/debug.h: 
