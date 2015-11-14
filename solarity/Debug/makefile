@@ -10,9 +10,11 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./SIM800C.obj" \
 "./SL_Display.obj" \
 "./main.obj" \
 "./msp432_startup_ccs.obj" \
+"./printf.obj" \
 "./driverlib/MSP432P4xx/adc14.obj" \
 "./driverlib/MSP432P4xx/aes256.obj" \
 "./driverlib/MSP432P4xx/comp_e.obj" \
@@ -45,7 +47,7 @@ ORDERED_OBJS += \
 "../driverlib/MSP432P4xx/ccs/msp432p4xx_driverlib.lib" \
 $(GEN_CMDS__FLAG) \
 -l"libc.a" \
--l"C:\Users\Zach\git\solarity\solarity\msp432p4xx_driverlib.lib" \
+-l"C:\Users\Owner\git\solarity\solarity\msp432p4xx_driverlib.lib" \
 
 -include ../makefile.init
 
@@ -193,8 +195,8 @@ solarity.bin: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "SL_Display.pp" "main.pp" "msp432_startup_ccs.pp" "driverlib\MSP432P4xx\adc14.pp" "driverlib\MSP432P4xx\aes256.pp" "driverlib\MSP432P4xx\comp_e.pp" "driverlib\MSP432P4xx\cpu.pp" "driverlib\MSP432P4xx\crc32.pp" "driverlib\MSP432P4xx\cs.pp" "driverlib\MSP432P4xx\dma.pp" "driverlib\MSP432P4xx\flash.pp" "driverlib\MSP432P4xx\fpu.pp" "driverlib\MSP432P4xx\gpio.pp" "driverlib\MSP432P4xx\i2c.pp" "driverlib\MSP432P4xx\interrupt.pp" "driverlib\MSP432P4xx\mpu.pp" "driverlib\MSP432P4xx\pcm.pp" "driverlib\MSP432P4xx\pmap.pp" "driverlib\MSP432P4xx\pss.pp" "driverlib\MSP432P4xx\ref_a.pp" "driverlib\MSP432P4xx\reset.pp" "driverlib\MSP432P4xx\rtc_c.pp" "driverlib\MSP432P4xx\spi.pp" "driverlib\MSP432P4xx\sysctl.pp" "driverlib\MSP432P4xx\systick.pp" "driverlib\MSP432P4xx\timer32.pp" "driverlib\MSP432P4xx\timer_a.pp" "driverlib\MSP432P4xx\uart.pp" "driverlib\MSP432P4xx\wdt_a.pp" 
-	-$(RM) "SL_Display.obj" "main.obj" "msp432_startup_ccs.obj" "driverlib\MSP432P4xx\adc14.obj" "driverlib\MSP432P4xx\aes256.obj" "driverlib\MSP432P4xx\comp_e.obj" "driverlib\MSP432P4xx\cpu.obj" "driverlib\MSP432P4xx\crc32.obj" "driverlib\MSP432P4xx\cs.obj" "driverlib\MSP432P4xx\dma.obj" "driverlib\MSP432P4xx\flash.obj" "driverlib\MSP432P4xx\fpu.obj" "driverlib\MSP432P4xx\gpio.obj" "driverlib\MSP432P4xx\i2c.obj" "driverlib\MSP432P4xx\interrupt.obj" "driverlib\MSP432P4xx\mpu.obj" "driverlib\MSP432P4xx\pcm.obj" "driverlib\MSP432P4xx\pmap.obj" "driverlib\MSP432P4xx\pss.obj" "driverlib\MSP432P4xx\ref_a.obj" "driverlib\MSP432P4xx\reset.obj" "driverlib\MSP432P4xx\rtc_c.obj" "driverlib\MSP432P4xx\spi.obj" "driverlib\MSP432P4xx\sysctl.obj" "driverlib\MSP432P4xx\systick.obj" "driverlib\MSP432P4xx\timer32.obj" "driverlib\MSP432P4xx\timer_a.obj" "driverlib\MSP432P4xx\uart.obj" "driverlib\MSP432P4xx\wdt_a.obj" 
+	-$(RM) "SIM800C.pp" "SL_Display.pp" "main.pp" "msp432_startup_ccs.pp" "printf.pp" "driverlib\MSP432P4xx\adc14.pp" "driverlib\MSP432P4xx\aes256.pp" "driverlib\MSP432P4xx\comp_e.pp" "driverlib\MSP432P4xx\cpu.pp" "driverlib\MSP432P4xx\crc32.pp" "driverlib\MSP432P4xx\cs.pp" "driverlib\MSP432P4xx\dma.pp" "driverlib\MSP432P4xx\flash.pp" "driverlib\MSP432P4xx\fpu.pp" "driverlib\MSP432P4xx\gpio.pp" "driverlib\MSP432P4xx\i2c.pp" "driverlib\MSP432P4xx\interrupt.pp" "driverlib\MSP432P4xx\mpu.pp" "driverlib\MSP432P4xx\pcm.pp" "driverlib\MSP432P4xx\pmap.pp" "driverlib\MSP432P4xx\pss.pp" "driverlib\MSP432P4xx\ref_a.pp" "driverlib\MSP432P4xx\reset.pp" "driverlib\MSP432P4xx\rtc_c.pp" "driverlib\MSP432P4xx\spi.pp" "driverlib\MSP432P4xx\sysctl.pp" "driverlib\MSP432P4xx\systick.pp" "driverlib\MSP432P4xx\timer32.pp" "driverlib\MSP432P4xx\timer_a.pp" "driverlib\MSP432P4xx\uart.pp" "driverlib\MSP432P4xx\wdt_a.pp" 
+	-$(RM) "SIM800C.obj" "SL_Display.obj" "main.obj" "msp432_startup_ccs.obj" "printf.obj" "driverlib\MSP432P4xx\adc14.obj" "driverlib\MSP432P4xx\aes256.obj" "driverlib\MSP432P4xx\comp_e.obj" "driverlib\MSP432P4xx\cpu.obj" "driverlib\MSP432P4xx\crc32.obj" "driverlib\MSP432P4xx\cs.obj" "driverlib\MSP432P4xx\dma.obj" "driverlib\MSP432P4xx\flash.obj" "driverlib\MSP432P4xx\fpu.obj" "driverlib\MSP432P4xx\gpio.obj" "driverlib\MSP432P4xx\i2c.obj" "driverlib\MSP432P4xx\interrupt.obj" "driverlib\MSP432P4xx\mpu.obj" "driverlib\MSP432P4xx\pcm.obj" "driverlib\MSP432P4xx\pmap.obj" "driverlib\MSP432P4xx\pss.obj" "driverlib\MSP432P4xx\ref_a.obj" "driverlib\MSP432P4xx\reset.obj" "driverlib\MSP432P4xx\rtc_c.obj" "driverlib\MSP432P4xx\spi.obj" "driverlib\MSP432P4xx\sysctl.obj" "driverlib\MSP432P4xx\systick.obj" "driverlib\MSP432P4xx\timer32.obj" "driverlib\MSP432P4xx\timer_a.obj" "driverlib\MSP432P4xx\uart.obj" "driverlib\MSP432P4xx\wdt_a.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
