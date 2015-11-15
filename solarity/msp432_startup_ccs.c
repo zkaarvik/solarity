@@ -48,7 +48,7 @@ static void FaultISR(void);
 static void IntDefaultHandler(void);
 extern void euscib0_isr(void);
 extern void euscia2_isr(void);
-//extern void euscia0_isr(void);
+extern void euscia0_isr(void);
 //*****************************************************************************
 //
 // External declaration for the reset handler that is to be called when the
@@ -113,8 +113,8 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // TA2_N ISR
     IntDefaultHandler,                      // TA3_0 ISR
     IntDefaultHandler,                      // TA3_N ISR
-	//euscia0_isr,                      // EUSCIA0 ISR
-	IntDefaultHandler,                  // EUSCIA0 ISR
+	euscia0_isr,                      // EUSCIA0 ISR
+	//IntDefaultHandler,                  // EUSCIA0 ISR
     IntDefaultHandler,                      // EUSCIA1 ISR
 	euscia2_isr,                      // EUSCIA2 ISR
     IntDefaultHandler,                      // EUSCIA3 ISR

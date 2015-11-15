@@ -9,16 +9,17 @@
 #include "printf.h"
 
 
-#define RX_BUFFER_SIZE	50  //RX_buffer size
+#define RX_BUFFER_SIZE	1000  //RX_buffer size
 #define DELAY_CHAR_SEND	96000 //delay time of 4 ms = 96000 * (1/24MHz)
+#define HTTP_DATA_BUFFER 50000
 
 
 /**/
 bool HTTPFLAG_FLAG = 0;
 static int NumOfCharRecevied = 0;
 static volatile uint8_t RXData[RX_BUFFER_SIZE];
-static volatile uint8_t HTTPData[27000];
-
+static volatile uint8_t HTTPData[HTTP_DATA_BUFFER];
+//static volatile char HTTPData[HTTP_DATA_BUFFER];
 /* UART Configuration Parameter. These are the configuration parameters to
  * make the eUSCI A UART module to operate with a 115200 baud rate. These
  * values were calculated using the online calculator that TI provides
@@ -79,7 +80,7 @@ void UART_GSM_init()
 
 }
 
-/*
+
  //EUSCI A0 UART ISR - Echoes data back to PC host
 void euscia0_isr(void)
 {
@@ -94,7 +95,7 @@ void euscia0_isr(void)
         //printf(EUSCI_A0_MODULE,"Byte Received: %x\n\r",data);
     }
 }
-*/
+
 
 /*EUSCI A2 UART ISR - Reads back the Command being sent and the response */
 void euscia2_isr(void)
@@ -164,6 +165,12 @@ void Clear_RX_Buffer(void){
 	}
 }
 
+void Clear_HTTP_buffer(void){
+	int i=0;
+	for(i=0; i<HTTP_DATA_BUFFER; i++){
+		HTTPData[i] = 0x00;
+	}
+}
 /*Send the AT command to the SIM800C GSM Module
  * Input: String of the Command to sent
  * Returns:
@@ -201,7 +208,7 @@ bool send_AT_command(char input[]){
 	 */
 	start = time(0);
 
-	while((time(0)-start)<3){
+	while((time(0)-start)<5){
 		if(check_for_OK()) return true; //return true if AT command was successful
 	}
 
@@ -219,6 +226,7 @@ void set_up_bearer_fido(void){
 }
 
 void Read_HTTP_Context(void){
+
 	size_t len = 0;
 	if(send_AT_command("AT+HTTPACTION=0")){
 		//Clear_RX_Buffer();//clear the buffer
@@ -247,8 +255,12 @@ void Read_HTTP_Context(void){
  * CAN ONLY CALL THIS ACTION AFTER A HTTPACTION=0 OR HTTPDATA AT COMMAND WAS EXECUTED PRIOR
  */
 void Transmit_HTTP_Read(void){
+	//Clear the http buffer
+	Clear_HTTP_buffer();
+
 	HTTPFLAG_FLAG =1 ;
 	send_AT_command("AT+HTTPREAD");
+
 }
 
 //This function opens the APN connection
@@ -271,12 +283,13 @@ void Init_HTTP_Service(void){
 
 //This function ends the HTTP service
 void End_HTTP_Service(void){
-	HTTPFLAG_FLAG =0;
+	//HTTPFLAG_FLAG =0;
 	send_AT_command("AT+HTTPTERM");
 }
 //This function set up the HTTP address to read from
 void Set_up_HTTP_Para(void){
-	send_AT_command("AT+HTTPPARA=URL,www.google.ca"); // setting the httppara, the second parameter is the website you want to access
+	send_AT_command("AT+HTTPPARA=URL,http://192.241.210.28:3000/api/image/whoooo"); // setting the httppara, the second parameter is the website you want to access
+	//send_AT_command("AT+HTTPPARA=URL,www.sfu.ca");
 	send_AT_command("AT+HTTPPARA=CID,1");
 }
 
