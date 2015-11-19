@@ -34,24 +34,15 @@
 int main()
 {
 
+	uint8_t *httpchar =0;
+
 	MAP_WDT_A_holdTimer();
 	UART_PC_init();
 	UART_GSM_init();
 
 	send_AT_command("AT+IPR=115200");
 
-	//set_up_bearer_fido();
-	set_up_bearer_rogers();
-	Open_Bearer_Connection();
-	Init_HTTP_Service();
-	Set_up_HTTP_Para();
-
-	//call the action
-	Read_HTTP_Context();
-
-	Transmit_HTTP_Read();
-	End_HTTP_Service();
-	Close_Bearer_Connection();
+	httpchar = request_to_server();
 
 	send_AT_command("AT+GMI");
 	//print_http_to_pc();

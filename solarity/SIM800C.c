@@ -9,26 +9,38 @@
 #include "printf.h"
 
 
-#define RX_BUFFER_SIZE	1000  //RX_buffer size
+#define RX_BUFFER_SIZE	200  //RX_buffer size
 #define DELAY_CHAR_SEND	96000 //delay time of 4 ms = 96000 * (1/24MHz)
-#define DELAY_HTTP_READ 50 //86 us
 #define HTTP_DATA_BUFFER 50000
 #define DUMP_CHAR		31
 
 
-/**/
+/*********************************************************************************************
+ * Flag Variables
+ *********************************************************************************************/
 bool HTTPFLAG_FLAG = 0;
-int NumOfCharRecevied = 0;
-int NumOfHttpData = 0;
-static volatile uint8_t RXData[RX_BUFFER_SIZE];
-static volatile uint8_t HTTPData[HTTP_DATA_BUFFER];
 
-/* UART Configuration Parameter. These are the configuration parameters to
+/*********************************************************************************************
+ * Counter Variables
+ *********************************************************************************************/
+int NumOfCharRecevied = 0; //to keep track of how much character was recevied per AT command
+int NumOfHttpData = 0;  //to keep track of how much http data was transferred from GSM to microcontoller
+
+/*********************************************************************************************
+ * Buffers to store information/data
+ *********************************************************************************************/
+static volatile uint8_t RXData[RX_BUFFER_SIZE]; //buffer to store the response of AT commands
+static volatile uint8_t HTTPData[HTTP_DATA_BUFFER]; // buffer to store the http data
+
+
+
+/* *****************************************************************************************************
+ * UART Configuration Parameter. These are the configuration parameters to
  * make the eUSCI A UART module to operate with a 115200 baud rate. These
  * values were calculated using the online calculator that TI provides
  * at:
  *http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430BaudRateConverter/index.html
- */
+ ********************************************************************************************************/
 const eUSCI_UART_Config uartConfig =
 {
     EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
@@ -42,6 +54,11 @@ const eUSCI_UART_Config uartConfig =
     EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
 	//EUSCI_A_UART_LOW_FREQUENCY_BAUDRATE_GENERATION //no-oversampling
 };
+
+/* *****************************************************************************************************
+ * This function is to init the PC UART port to the configured baud rate
+ * Used for debugging purposes
+ ********************************************************************************************************/
 void UART_PC_init()
 {
 	//Used for debugging purposes
@@ -59,6 +76,12 @@ void UART_PC_init()
 
 }
 
+/* *****************************************************************************************************
+ * This function is to init pins 3.2 and 3.3 to the configured baud rates to communicate
+ * with the GSM module
+ * pin 3.2 -> RX of the GSM module
+ * pin 3.3 -> TX of the GSM module
+ ********************************************************************************************************/
 void UART_GSM_init()
 {
 
@@ -77,6 +100,7 @@ void UART_GSM_init()
 	MAP_UART_enableInterrupt(EUSCI_A2_MODULE, EUSCI_A_UART_RECEIVE_INTERRUPT);
 	MAP_Interrupt_enableInterrupt(INT_EUSCIA2);
 
+	/**/
 	UART_selectDeglitchTime(EUSCI_A2_MODULE,EUSCI_A_UART_DEGLITCH_TIME_200ns);
 
 	/* Enabling interrupts */
@@ -95,12 +119,15 @@ void euscia0_isr(void)
     if(status & EUSCI_A_UART_RECEIVE_INTERRUPT)
     {
     	//MAP_UART_receiveData(EUSCI_A0_MODULE);
-    	printf(EUSCI_A0_MODULE,"Interrupt!!!\r\n");
+    	//printf(EUSCI_A0_MODULE,"Interrupt!!!\r\n");
         //printf(EUSCI_A0_MODULE,"Byte Received: %x\n\r",data);
     }
 }
-
-/*EUSCI A2 UART ISR - Reads back the Command being sent and the response */
+/* *****************************************************************************************************
+ * The interrupt when the RXxBuf of EUSCI A2 gets a character from the GSM module
+ * Store the response in the RXbuffer
+ * Store the response in the HTTPBuffer if the http flag is set
+ ********************************************************************************************************/
 void euscia2_isr(void)
 {
 
@@ -110,7 +137,6 @@ void euscia2_isr(void)
 
     MAP_UART_clearInterruptFlag(EUSCI_A2_MODULE, status);
 
-    //Goes into this loop when HTTPREAD is called
     if(status & EUSCI_A_UART_RECEIVE_INTERRUPT){
     	data = MAP_UART_receiveData(EUSCI_A2_MODULE);
     	//Store the data in the httpbuffer, we dont want to output the result to pc terminal b/c we may lose bytes along the way
@@ -162,7 +188,16 @@ void euscia2_isr(void)
  */
 
 
-//This function is to check for the "OK\r\n" in the RX_buffer
+/* *****************************************************************************************************
+ * This function is called to check that there was an OK reponse from the AT command
+ * Should be called after a certain delay after an AT command was executed to allow time for response
+ *
+ * INPUT: None
+ *
+ * RETURNS:
+ * 	- True: Found an OK in the RX buffer
+ * 	- False: Did not found an OK in the RX buffer, assumed to be ERROR msg
+ ********************************************************************************************************/
 bool check_for_OK(void){
 	size_t len = strlen(RXData);
 	const uint8_t O_char = 'O';
@@ -188,7 +223,9 @@ bool check_for_OK(void){
 }
 
 
-// This function is used to clear the RX buffer
+/* *****************************************************************************************************
+* This function clears the RX buffer
+********************************************************************************************************/
 void Clear_RX_Buffer(void){
 	int i=0;
 	for(i=0;i<RX_BUFFER_SIZE;i++){
@@ -196,6 +233,10 @@ void Clear_RX_Buffer(void){
 	}
 }
 
+
+/* *****************************************************************************************************
+* This function clears the HTTPData buffer
+********************************************************************************************************/
 void Clear_HTTP_buffer(void){
 	int i=0;
 	for(i=0; i<HTTP_DATA_BUFFER; i++){
@@ -204,21 +245,23 @@ void Clear_HTTP_buffer(void){
 }
 
 
-
-/*Send the AT command to the SIM800C GSM Module
- * Input: String of the Command to sent
- * Returns:
- * 		1 - AT command was successful
- * 		0 - AT command was not successful
-*/
-
+/* *****************************************************************************************************
+* This function sends the AT command to the GSM module
+*
+* INPUT:
+* 	- char input[]: The string of the AT command to execute
+*
+* Returns:
+* 	-True: AT command was successful
+* 	-False: AT command was not successful
+********************************************************************************************************/
 bool send_AT_command(char input[]){
 
 	size_t len = strlen(input);
-	NumOfCharRecevied = 0;
+	NumOfCharRecevied = 0; //reset the counter
 	Clear_RX_Buffer(); //Clear the RX buffer before sending Command
 
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//__delay_cycles(DELAY_CHAR_SEND*100);
 
 	//Sending the AT command one character at a time
 	int i = 0;
@@ -241,28 +284,37 @@ bool send_AT_command(char input[]){
 	else return false;
 }
 
-//This function set up the APN with a fido network carrier
+
+/* *****************************************************************************************************
+* This function sets up the APN for an Fido network carrier
+********************************************************************************************************/
 void set_up_bearer_fido(void){
-	 //char ATcommand[] = "AT+SAPBR=3,1,APN,internet.fido.ca";
+
+	//delay before sending next command
 	 send_AT_command("AT+SAPBR=3,1,APN,internet.fido.ca");
-
+	 __delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,USER,fido");
-
+	 __delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,PWD,fido");
+	 __delay_cycles(DELAY_CHAR_SEND*100);
 }
 
-//This function set up the APN with a roger network carrier
+/* *****************************************************************************************************
+* This function sets up the APN for an Rogers network carrier
+********************************************************************************************************/
 void set_up_bearer_rogers(void){
 	 send_AT_command("AT+SAPBR=3,1,APN,internet.com");
-
+	 __delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,USER,wapuser1");
-
+	 __delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,PWD,wap");
+	 __delay_cycles(DELAY_CHAR_SEND*100);
 }
 
-
-void Read_HTTP_Context(void){
-	//Clear_RX_Buffer();//clear the buffer
+/* *****************************************************************************************************
+* This function execute the AT+HTTPACTION=0 command, which reads the data from the assigned URL
+********************************************************************************************************/
+void Read_HTTP_Content(void){
 	size_t len = 0;
 	send_AT_command("AT+HTTPACTION=0");
 
@@ -274,17 +326,17 @@ void Read_HTTP_Context(void){
 	 * TOD0: add a timeout, dont want to be in this loop forever
 	 * TOD0: check for error code?
 	 */
-
-
 	while(len<41){
 		len = strlen(RXData);
 	}
 
 }
 
-/*This function reads all the data from the HTTPACTION=0 or HTTPDATA command
- * CAN ONLY CALL THIS ACTION AFTER A HTTPACTION=0 OR HTTPDATA AT COMMAND WAS EXECUTED PRIOR
- */
+
+/* *****************************************************************************************************
+* This function reads all the data from the HTTPACTION=0 or HTTPDATA command
+* CAN ONLY THIS FUNCTION AFTER A HTTPACTION=0 or HTTPDATA AT COMMAND WAS EXECUTED PRIOR
+********************************************************************************************************/
 void Transmit_HTTP_Read(void){
 	//Clear the http buffer
 	NumOfHttpData = 0;
@@ -304,18 +356,20 @@ void Transmit_HTTP_Read(void){
 	for(i=0;i<2000;i++)__delay_cycles(DELAY_CHAR_SEND);
 }
 
-
-//This function opens the APN connection
-//MUST CALL THIS FUNCTION TO GET THE GSM TO ENTER GRPS MODE
+/* *****************************************************************************************************
+* This function opens the APN connection
+* MUST CALL THIS FUNCTION TO GET THE GSM TO ENTER GRPS MODE
+********************************************************************************************************/
 void Open_Bearer_Connection(void){
 	send_AT_command("AT+SAPBR=1,1");
 
-
 	//To check that the gsm is connected
-	send_AT_command("AT+SAPBR=2,1");
+	//send_AT_command("AT+SAPBR=2,1");
 }
 
-//This function closes the APN connection
+/* *****************************************************************************************************
+* This function closes the APN connection
+********************************************************************************************************/
 void Close_Bearer_Connection(void){
 	send_AT_command("AT+SAPBR=0,1");
 	__delay_cycles(DELAY_CHAR_SEND*100);
@@ -324,25 +378,65 @@ void Close_Bearer_Connection(void){
 	printf(EUSCI_A0_MODULE,"Num of http data read: %i",NumOfHttpData);
 }
 
-/*
- * This function starts the HTTP service
- * MUST CALL THIS FUNCTION TO START ANY HTTP ACTION
-*/
+/* *****************************************************************************************************
+* This function starts the HTTP service
+* MUST CALL THIS FUNCTION TO START ANY HTTP-RELATED AT COMMANDS
+********************************************************************************************************/
 void Init_HTTP_Service(void){
 	send_AT_command("AT+HTTPINIT");
 }
 
-//This function ends the HTTP service
+/* *****************************************************************************************************
+* This funtions ends the HTTP service
+********************************************************************************************************/
 void End_HTTP_Service(void){
 	//HTTPFLAG_FLAG =0;
 	send_AT_command("AT+HTTPTERM");
 }
-//This function set up the HTTP address to read from
+
+/* *****************************************************************************************************
+* This function sets up the HTTP address to read from
+********************************************************************************************************/
 void Set_up_HTTP_Para(void){
 	send_AT_command("AT+HTTPPARA=URL,http://192.241.210.28:3000/api/image/whoooo"); // setting the httppara, the second parameter is the website you want to access
 	//send_AT_command("AT+HTTPPARA=URL,http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430BaudRateConverter/index.html");
 	//send_AT_command("AT+HTTPPARA=URL,http://www.bcit.ca");
 	//send_AT_command("AT+HTTPPARA=CID,1");
+}
+
+/* *****************************************************************************************************
+* This function set the GSM module to connect to the internet then connect to the server
+* and grabs the data and store it in the HTTPBuffer array
+*
+* INPUTS: None
+*
+* RETURNS:
+* 	-	pointer to the address of the HTTPDATA buffer
+********************************************************************************************************/
+uint8_t * request_to_server(void){
+
+
+	set_up_bearer_rogers();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+	Open_Bearer_Connection();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+	Init_HTTP_Service();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+	Set_up_HTTP_Para();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+
+	//call the action
+	Read_HTTP_Content();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+
+	Transmit_HTTP_Read();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+	End_HTTP_Service();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+	Close_Bearer_Connection();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+
+	return HTTPData;
 }
 
 
