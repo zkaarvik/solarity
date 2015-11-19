@@ -38,9 +38,10 @@ int main()
 	UART_PC_init();
 	UART_GSM_init();
 
-	send_AT_command("AT+GMI");
+	send_AT_command("AT+IPR=115200");
 
-	set_up_bearer_fido();
+	//set_up_bearer_fido();
+	set_up_bearer_rogers();
 	Open_Bearer_Connection();
 	Init_HTTP_Service();
 	Set_up_HTTP_Para();
@@ -51,6 +52,9 @@ int main()
 	Transmit_HTTP_Read();
 	End_HTTP_Service();
 	Close_Bearer_Connection();
+
+	send_AT_command("AT+GMI");
+	//print_http_to_pc();
 
 }
 
