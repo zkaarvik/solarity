@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -l"libc.a" -l"C:/Users/Timmy/git/solarity/solarity/msp432p4xx_driverlib.lib"
+LIBS := -l"libc.a" -l"C:/Users/Rob/Downloads/code\ for\ gsm/solarity/solarity-master/solarity/msp432p4xx_driverlib.lib"
 

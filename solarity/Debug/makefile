@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5
+CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -47,7 +47,7 @@ ORDERED_OBJS += \
 "../driverlib/MSP432P4xx/ccs/msp432p4xx_driverlib.lib" \
 $(GEN_CMDS__FLAG) \
 -l"libc.a" \
--l"C:\Users\Timmy\git\solarity\solarity\msp432p4xx_driverlib.lib" \
+-l"C:\Users\Rob\git\solarity_git\solarity\msp432p4xx_driverlib.lib" \
 
 -include ../makefile.init
 
@@ -180,14 +180,14 @@ all: solarity.out
 solarity.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(A_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MSP432 Linker'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 --abi=eabi -me --advice:power="all" -g --gcc --define=__MSP432P401R__ --define=TARGET_IS_MSP432P4XX --define=ccs --diag_wrap=off --diag_warning=225 --display_error_number -z -m"solarity.map" --stack_size=512 -i"C:/ti/ccsv6/ccs_base/arm/include" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/include" --reread_libs --display_error_number --diag_wrap=off --warn_sections --xml_link_info="solarity_linkInfo.xml" --rom_model -o "solarity.out" $(ORDERED_OBJS) $(A_SRCS)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 --abi=eabi -me --advice:power="all" -g --gcc --define=__MSP432P401R__ --define=TARGET_IS_MSP432P4XX --define=ccs --display_error_number --diag_warning=225 --diag_wrap=off -z -m"solarity.map" --stack_size=512 -i"C:/ti/ccsv6/ccs_base/arm/include" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="solarity_linkInfo.xml" --rom_model -o "solarity.out" $(ORDERED_OBJS) $(A_SRCS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
 
 solarity.bin: $(EXE_OUTPUTS)
 	@echo 'Invoking: MSP432 Hex Utility'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/bin/armhex"  -o "solarity.bin" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS/bin/armhex"  -o "solarity.bin" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
@@ -201,7 +201,7 @@ clean:
 	-@echo ' '
 
 post-build:
-	-C:/ti/ccsv6/utils/tiobj2bin/tiobj2bin solarity.out solarity.bin C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/bin/armofd C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.5/bin/armhex C:/ti/ccsv6/utils/tiobj2bin/mkhex4bin
+	-C:/ti/ccsv6/utils/tiobj2bin/tiobj2bin solarity.out solarity.bin C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS/bin/armofd C:/ti/ccsv6/tools/compiler/ti-cgt-arm_15.9.0.STS/bin/armhex C:/ti/ccsv6/utils/tiobj2bin/mkhex4bin
 	-@echo ' '
 
 .PHONY: all clean dependents

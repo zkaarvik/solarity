@@ -6,6 +6,9 @@
 CMD_SRCS += \
 ../driverlib_empty_project_ccs.cmd 
 
+OUT_SRCS += \
+../solarity.out 
+
 LIB_SRCS += \
 ../msp432p4xx_driverlib.lib 
 
@@ -50,5 +53,8 @@ C_SRCS__QUOTED += \
 "../main.c" \
 "../msp432_startup_ccs.c" \
 "../printf.c" 
+
+OUT_SRCS__QUOTED += \
+"../solarity.out" 
 
 
