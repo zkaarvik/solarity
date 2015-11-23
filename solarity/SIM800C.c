@@ -6,13 +6,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
-#include "printf.h"
+//#include "printf.h"
 
 
-#define RX_BUFFER_SIZE	200  //RX_buffer size
-#define DELAY_CHAR_SEND	96000 //delay time of 4 ms = 96000 * (1/24MHz)
-#define HTTP_DATA_BUFFER 50000
-#define DUMP_CHAR		31
+#define RX_BUFFER_SIZE		1000  //RX_buffer size
+#define DELAY_CHAR_SEND		96000 //delay time of 4 ms = 96000 * (1/24MHz)
+#define HTTP_DATA_BUFFER 	50000
+#define DUMP_CHAR			31
+#define HTTPDATA_SIZE 		48016
 
 
 /*********************************************************************************************
@@ -106,6 +107,11 @@ void UART_GSM_init()
 	/* Enabling interrupts */
 	//MAP_Interrupt_enableSleepOnIsrExit();
 	MAP_Interrupt_enableMaster(); // allows the processor to respond to interrupts.
+
+	send_AT_command("AT+IPR=115200");
+	__delay_cycles(DELAY_CHAR_SEND*100);
+
+
 }
 
 
@@ -152,41 +158,6 @@ void euscia2_isr(void)
     }
 
 }
-
-/*
- void euscia2_isr(void)
-{
-
-	uint8_t data = 0x00;
-
-    uint32_t status = MAP_UART_getEnabledInterruptStatus(EUSCI_A2_MODULE);
-
-    MAP_UART_clearInterruptFlag(EUSCI_A2_MODULE, status);
-
-
-    //Goes into this loop when HTTPREAD is called
-    if(status & EUSCI_A_UART_RECEIVE_INTERRUPT & HTTPFLAG_FLAG & (NumOfCharRecevied>DUMP_CHAR))
-	{
-    	int i=0;
-
-    	for(i=0;i<1;i++){
-
-    		data = MAP_UART_receiveData(EUSCI_A2_MODULE);
-			//MAP_UART_transmitData(EUSCI_A0_MODULE,data); //echo back to PC for debugging purposes
-			HTTPData[NumOfHttpData++] = data;
-    	}
-	}
-
-    else if(status & EUSCI_A_UART_RECEIVE_INTERRUPT)
-    {
-    	data = MAP_UART_receiveData(EUSCI_A2_MODULE);
-    	MAP_UART_transmitData(EUSCI_A0_MODULE,data); //echo back to PC for debugging purposes
-    	RXData[NumOfCharRecevied++] = data;
-    }
-
-}
- */
-
 
 /* *****************************************************************************************************
  * This function is called to check that there was an OK reponse from the AT command
@@ -260,6 +231,7 @@ bool send_AT_command(char input[]){
 	size_t len = strlen(input);
 	NumOfCharRecevied = 0; //reset the counter
 	Clear_RX_Buffer(); //Clear the RX buffer before sending Command
+	//time_t start_time = 0;
 
 	//__delay_cycles(DELAY_CHAR_SEND*100);
 
@@ -280,8 +252,18 @@ bool send_AT_command(char input[]){
 
 	__delay_cycles(DELAY_CHAR_SEND*10); //wait for the OK response
 
-	if(check_for_OK()) return true;
-	else return false;
+	//start_time = time(NULL);
+
+	/*
+	while((time(NULL)-start_time)<5){
+		if(check_for_OK()) return true;
+	}
+
+	return false;
+	//if(check_for_OK()) return true;
+	//else return false;
+	 *
+	 */
 }
 
 
@@ -326,7 +308,7 @@ void Read_HTTP_Content(void){
 	 * TOD0: add a timeout, dont want to be in this loop forever
 	 * TOD0: check for error code?
 	 */
-	while(len<41){
+	while(len<45){
 		len = strlen(RXData);
 	}
 
@@ -353,7 +335,13 @@ void Transmit_HTTP_Read(void){
 	 * if the delay isnt enough then the http data is going to be lost
 	 */
 
-	for(i=0;i<2000;i++)__delay_cycles(DELAY_CHAR_SEND);
+	/*
+	while(1){
+		//TODO:
+		if(NumOfHttpData==(HTTPDATA_SIZE+6))  break;//the plus 6 is due to the OK from the GSM module
+	}
+	*/
+	for(i=0;i<1000;i++)__delay_cycles(DELAY_CHAR_SEND);
 }
 
 /* *****************************************************************************************************
@@ -375,7 +363,7 @@ void Close_Bearer_Connection(void){
 	__delay_cycles(DELAY_CHAR_SEND*100);
 
 	//debugging purposes
-	printf(EUSCI_A0_MODULE,"Num of http data read: %i",NumOfHttpData);
+	//printf(EUSCI_A0_MODULE,"Num of http data read: %i\r\n",NumOfHttpData);
 }
 
 /* *****************************************************************************************************
@@ -398,12 +386,36 @@ void End_HTTP_Service(void){
 * This function sets up the HTTP address to read from
 ********************************************************************************************************/
 void Set_up_HTTP_Para(void){
-	send_AT_command("AT+HTTPPARA=URL,http://192.241.210.28:3000/api/image/whoooo"); // setting the httppara, the second parameter is the website you want to access
+	//send_AT_command("AT+HTTPPARA=URL,http://192.241.210.28:3000/api/image/whoooo"); // setting the httppara, the second parameter is the website you want to access
+	send_AT_command("AT+HTTPPARA=URL,www.sfu.ca");
+	//http://192.241.210.28:3000/api/image/whoooo
 	//send_AT_command("AT+HTTPPARA=URL,http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430BaudRateConverter/index.html");
 	//send_AT_command("AT+HTTPPARA=URL,http://www.bcit.ca");
-	//send_AT_command("AT+HTTPPARA=CID,1");
+	send_AT_command("AT+HTTPPARA=CID,1");
 }
 
+uint8_t * request_to_server_secondtime(void){
+	Open_Bearer_Connection();
+		__delay_cycles(DELAY_CHAR_SEND*100);
+	Init_HTTP_Service();
+		__delay_cycles(DELAY_CHAR_SEND*100);
+		Set_up_HTTP_Para();
+			__delay_cycles(DELAY_CHAR_SEND*100);
+
+			//call the action
+			Read_HTTP_Content();
+			__delay_cycles(DELAY_CHAR_SEND*100);
+
+
+			Transmit_HTTP_Read();
+			__delay_cycles(DELAY_CHAR_SEND*100);
+			End_HTTP_Service();
+			__delay_cycles(DELAY_CHAR_SEND*100);
+			Close_Bearer_Connection();
+			__delay_cycles(DELAY_CHAR_SEND*100);
+
+			return HTTPData;
+}
 /* *****************************************************************************************************
 * This function set the GSM module to connect to the internet then connect to the server
 * and grabs the data and store it in the HTTPBuffer array
@@ -418,16 +430,21 @@ uint8_t * request_to_server(void){
 
 	set_up_bearer_rogers();
 	__delay_cycles(DELAY_CHAR_SEND*100);
+
+	Set_up_HTTP_Para();
+	__delay_cycles(DELAY_CHAR_SEND*100);
+
 	Open_Bearer_Connection();
 	__delay_cycles(DELAY_CHAR_SEND*100);
 	Init_HTTP_Service();
 	__delay_cycles(DELAY_CHAR_SEND*100);
-	Set_up_HTTP_Para();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//Set_up_HTTP_Para();
+	//__delay_cycles(DELAY_CHAR_SEND*100);
 
 	//call the action
 	Read_HTTP_Content();
 	__delay_cycles(DELAY_CHAR_SEND*100);
+
 
 	Transmit_HTTP_Read();
 	__delay_cycles(DELAY_CHAR_SEND*100);
@@ -439,9 +456,17 @@ uint8_t * request_to_server(void){
 	return HTTPData;
 }
 
+void low_power_mode(void){
+	send_AT_command("AT+CFUN=4");
+}
+
+void full_mode(void){
+	int i=0;
+	send_AT_command("AT+CFUN=1");
+	for(i=0;i<2000;i++)__delay_cycles(DELAY_CHAR_SEND); //delay to connect
+}
 
 
-/*
 void print_http_to_pc(void){
 	int i =0;
 	for(i=0;i<48016;i++){
@@ -449,4 +474,4 @@ void print_http_to_pc(void){
 		//__delay_cycles(DELAY_CHAR_SEND); //delay time before sending the next char
 	}
 }
-*/
+
