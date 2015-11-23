@@ -49,6 +49,7 @@ static void IntDefaultHandler(void);
 extern void euscib0_isr(void);
 extern void euscia2_isr(void);
 extern void euscia0_isr(void);
+extern void timer32_0_isr(void);
 //*****************************************************************************
 //
 // External declaration for the reset handler that is to be called when the
@@ -123,7 +124,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // EUSCIB2 ISR
     IntDefaultHandler,                      // EUSCIB3 ISR
     IntDefaultHandler,                      // ADC12 ISR
-    IntDefaultHandler,                      // T32_INT1 ISR
+    timer32_0_isr,                      // T32_INT1 ISR
     IntDefaultHandler,                      // T32_INT2 ISR
     IntDefaultHandler,                      // T32_INTC ISR
     IntDefaultHandler,                      // AES ISR
