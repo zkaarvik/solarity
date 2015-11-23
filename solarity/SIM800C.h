@@ -26,5 +26,9 @@ void End_HTTP_Service();
 void Set_up_HTTP_Para();
 void print_http_to_pc();
 uint8_t * request_to_server();
+void init_timer32_0();
+void low_power_mode();
+void full_mode();
+
 
 #endif /* SOLARITY_SL_DISPLAY_H_ */
