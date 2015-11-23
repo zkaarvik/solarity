@@ -105,6 +105,51 @@ void SL_D_sendCmd(uint8_t cmdArr[], uint8_t cmdSize)
 	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0);
 }
 
+void SL_D_uploadImgData(uint8_t cmdArr[], uint8_t cmdSize)
+{
+	uint8_t i; //Max image data packet size is 251, so uint8_t is an acceptable type
+
+	/* Begin command, activate CS */
+	GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
+	/* 6.0us (T_S) between CS low and first bit */
+	__delay_cycles(320); //6us @ 48Mhz = 288 cycles
+
+	/*Send uploadImageDataCommand*/
+	SL_D_sendByte(0x20);
+	SL_D_sendByte(0x01);
+	SL_D_sendByte(0x00);
+
+	/*Send Packet size*/
+	SL_D_sendByte(cmdSize);
+
+	/*Send image packet*/
+	for(i=0; i<cmdSize; i++)
+	{
+		SL_D_sendByte(cmdArr[i]);
+	}
+
+	/* SPI Command Transfer complete, 11us (T_E) delay before CS high (inactive) */
+	__delay_cycles(560); //11us @ 48Mhz = 528 cycles
+	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
+
+	/* TCM is busy processing command. Wait for T_A + min T_BUSY = 26us, then wait for busy signal to deactivate, then wait T_NS 2us */
+	__delay_cycles(1300); //26us @ 48Mhz = 1248 cycles
+	while(!(GPIO_getInputPinValue(GPIO_PORT_P5, GPIO_PIN2))); //BUSY
+	__delay_cycles(120); //2us @ 48Mhz = 96 cycles
+
+	/* After command processing, receive response. Activate CS then wait before sending initial bit (T_S) */
+	GPIO_setOutputLowOnPin(GPIO_PORT_P5, GPIO_PIN0); //CS
+	__delay_cycles(320); //6us @ 48Mhz = 288 cycles
+
+	/* Send dummy bits, while receiving response */
+	SL_D_sendByte(0x00);
+	SL_D_sendByte(0x00);
+
+	/* Response received, deactivate CS after T_E (11us), communication finished */
+	__delay_cycles(560); //11us @ 48Mhz = 528 cycles
+	GPIO_setOutputHighOnPin(GPIO_PORT_P5, GPIO_PIN0);
+}
+
 void euscib0_isr(void)
 {
 	uint8_t data = 0x00;
