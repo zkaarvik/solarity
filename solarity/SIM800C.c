@@ -14,6 +14,7 @@
 #define HTTP_DATA_BUFFER 	50000
 #define DUMP_CHAR			31
 #define HTTPDATA_SIZE 		48016
+#define TIMEOUT				30  //timeout of 30 secs
 
 
 /*********************************************************************************************
@@ -78,6 +79,102 @@ void UART_PC_init()
 }
 
 /* *****************************************************************************************************
+* This function clears the RX buffer
+********************************************************************************************************/
+void Clear_RX_Buffer(void){
+	int i=0;
+	for(i=0;i<RX_BUFFER_SIZE;i++){
+		RXData[i] = 0x00;
+	}
+}
+
+
+/* *****************************************************************************************************
+ * This function is called to check that there was an OK reponse from the AT command
+ * Should be called after a certain delay after an AT command was executed to allow time for response
+ *
+ * INPUT: None
+ *
+ * RETURNS:
+ * 	- True: Found an OK in the RX buffer
+ * 	- False: Did not found an OK in the RX buffer, assumed to be ERROR msg
+ ********************************************************************************************************/
+bool check_for_OK(void){
+	size_t len = strlen(RXData);
+	const uint8_t O_char = 'O';
+	const uint8_t K_char = 'K';
+	const uint8_t CarRet_char = 0x0D;
+	const uint8_t NewLine_char = 0x0A;
+	int i=0;
+
+	//Checks for "OK\r\n" meesage in the RX buffer
+	for(i=0;i<len;i++){
+		if(RXData[i]== O_char){
+			if(RXData[i+1]== K_char){
+				if(RXData[i+2]== CarRet_char){
+					if(RXData[i+3]== NewLine_char){
+						return true; //return True if there was an OK from AT command
+					}
+				}
+			}
+
+		}
+	}
+	return false; //return False if there was no OK response from AT command
+}
+
+
+
+/* *****************************************************************************************************
+* This function sends the AT command to the GSM module
+*
+* INPUT:
+* 	- char input[]: The string of the AT command to execute
+*
+* Returns:
+* 	-True: AT command was successful
+* 	-False: AT command was not successful
+********************************************************************************************************/
+bool send_AT_command(char input[]){
+
+	size_t len = strlen(input);
+	NumOfCharRecevied = 0; //reset the counter
+	Clear_RX_Buffer(); //Clear the RX buffer before sending Command
+	//time_t start_time = 0;
+
+	//__delay_cycles(DELAY_CHAR_SEND*100);
+
+	//Sending the AT command one character at a time
+	int i = 0;
+	for(i=0;i<len;i++){
+		MAP_UART_transmitData(EUSCI_A2_MODULE,input[i]);
+		__delay_cycles(DELAY_CHAR_SEND); //delay time before sending the next char
+	}
+
+	/*Must send a carriage return and new life character to tell GSM
+	module the end of the command
+	*/
+	MAP_UART_transmitData(EUSCI_A2_MODULE,'\r'); //send the \r
+	__delay_cycles(DELAY_CHAR_SEND);
+	MAP_UART_transmitData(EUSCI_A2_MODULE,'\n'); // send the \n
+
+
+	__delay_cycles(DELAY_CHAR_SEND*10); //wait for the OK response
+
+}
+
+
+void Sync_GSM_Module_Baud_rate_with_host(void){
+	while(1){
+		send_AT_command("AT");
+		if(check_for_OK()) break;
+	}
+
+	send_AT_command("AT+IPR=115200");
+	__delay_cycles(DELAY_CHAR_SEND*100);
+}
+
+/* *****************************************************************************************************
  * This function is to init pins 3.2 and 3.3 to the configured baud rates to communicate
  * with the GSM module
  * pin 3.2 -> RX of the GSM module
@@ -108,9 +205,8 @@ void UART_GSM_init()
 	//MAP_Interrupt_enableSleepOnIsrExit();
 	MAP_Interrupt_enableMaster(); // allows the processor to respond to interrupts.
 
-	send_AT_command("AT+IPR=115200");
-	__delay_cycles(DELAY_CHAR_SEND*100);
 
+	Sync_GSM_Module_Baud_rate_with_host();
 
 }
 
@@ -160,52 +256,6 @@ void euscia2_isr(void)
 }
 
 /* *****************************************************************************************************
- * This function is called to check that there was an OK reponse from the AT command
- * Should be called after a certain delay after an AT command was executed to allow time for response
- *
- * INPUT: None
- *
- * RETURNS:
- * 	- True: Found an OK in the RX buffer
- * 	- False: Did not found an OK in the RX buffer, assumed to be ERROR msg
- ********************************************************************************************************/
-bool check_for_OK(void){
-	size_t len = strlen(RXData);
-	const uint8_t O_char = 'O';
-	const uint8_t K_char = 'K';
-	const uint8_t CarRet_char = 0x0D;
-	const uint8_t NewLine_char = 0x0A;
-	int i=0;
-
-	//Checks for "OK\r\n" meesage in the RX buffer
-	for(i=0;i<len;i++){
-		if(RXData[i]== O_char){
-			if(RXData[i+1]== K_char){
-				if(RXData[i+2]== CarRet_char){
-					if(RXData[i+3]== NewLine_char){
-						return true; //return True if there was an OK from AT command
-					}
-				}
-			}
-
-		}
-	}
-	return false; //return False if there was no OK response from AT command
-}
-
-
-/* *****************************************************************************************************
-* This function clears the RX buffer
-********************************************************************************************************/
-void Clear_RX_Buffer(void){
-	int i=0;
-	for(i=0;i<RX_BUFFER_SIZE;i++){
-		RXData[i] = 0x00;
-	}
-}
-
-
-/* *****************************************************************************************************
 * This function clears the HTTPData buffer
 ********************************************************************************************************/
 void Clear_HTTP_buffer(void){
@@ -214,58 +264,6 @@ void Clear_HTTP_buffer(void){
 		HTTPData[i] = 0x00;
 	}
 }
-
-
-/* *****************************************************************************************************
-* This function sends the AT command to the GSM module
-*
-* INPUT:
-* 	- char input[]: The string of the AT command to execute
-*
-* Returns:
-* 	-True: AT command was successful
-* 	-False: AT command was not successful
-********************************************************************************************************/
-bool send_AT_command(char input[]){
-
-	size_t len = strlen(input);
-	NumOfCharRecevied = 0; //reset the counter
-	Clear_RX_Buffer(); //Clear the RX buffer before sending Command
-	//time_t start_time = 0;
-
-	//__delay_cycles(DELAY_CHAR_SEND*100);
-
-	//Sending the AT command one character at a time
-	int i = 0;
-	for(i=0;i<len;i++){
-		MAP_UART_transmitData(EUSCI_A2_MODULE,input[i]);
-		__delay_cycles(DELAY_CHAR_SEND); //delay time before sending the next char
-	}
-
-	/*Must send a carriage return and new life character to tell GSM
-	module the end of the command
-	*/
-	MAP_UART_transmitData(EUSCI_A2_MODULE,'\r'); //send the \r
-	__delay_cycles(DELAY_CHAR_SEND);
-	MAP_UART_transmitData(EUSCI_A2_MODULE,'\n'); // send the \n
-
-
-	__delay_cycles(DELAY_CHAR_SEND*10); //wait for the OK response
-
-	//start_time = time(NULL);
-
-	/*
-	while((time(NULL)-start_time)<5){
-		if(check_for_OK()) return true;
-	}
-
-	return false;
-	//if(check_for_OK()) return true;
-	//else return false;
-	 *
-	 */
-}
-
 
 /* *****************************************************************************************************
 * This function sets up the APN for an Fido network carrier
@@ -298,6 +296,7 @@ void set_up_bearer_rogers(void){
 ********************************************************************************************************/
 void Read_HTTP_Content(void){
 	size_t len = 0;
+	time_t start_time = 0;
 	send_AT_command("AT+HTTPACTION=0");
 
 	/*
@@ -305,11 +304,19 @@ void Read_HTTP_Content(void){
 	 * that indicates that the GSM has finish
 	 * reading the website. The amount of time depends if the website has
 	 * a large amount of data.
-	 * TOD0: add a timeout, dont want to be in this loop forever
 	 * TOD0: check for error code?
+	 */
+
+	start_time = time(NULL);
+
+	/*
+	 * Wait to get data within the timeout
+	 * if we get the data within the timeout then break
+	 * else if we didnt get the data within the timeout then error
 	 */
 	while(len<45){
 		len = strlen(RXData);
+		//if((time(NULL)-start_time)<TIMEOUT) break;
 	}
 
 }
@@ -327,21 +334,20 @@ void Transmit_HTTP_Read(void){
 	HTTPFLAG_FLAG =1 ;
 	send_AT_command("AT+HTTPREAD");
 
-	int i= 0;
-
-
 	/*
 	 * IMPORTANT: delay to allow the GSM to send all the httpdata to the microcontroller
 	 * if the delay isnt enough then the http data is going to be lost
 	 */
 
-	/*
 	while(1){
 		//TODO:
 		if(NumOfHttpData==(HTTPDATA_SIZE+6))  break;//the plus 6 is due to the OK from the GSM module
 	}
-	*/
-	for(i=0;i<1000;i++)__delay_cycles(DELAY_CHAR_SEND);
+
+	HTTPFLAG_FLAG = false ;
+	NumOfHttpData = 0;
+	//int i= 0;
+	//for(i=0;i<1000;i++)__delay_cycles(DELAY_CHAR_SEND);
 }
 
 /* *****************************************************************************************************
@@ -378,7 +384,7 @@ void Init_HTTP_Service(void){
 * This funtions ends the HTTP service
 ********************************************************************************************************/
 void End_HTTP_Service(void){
-	//HTTPFLAG_FLAG =0;
+	HTTPFLAG_FLAG =0;
 	send_AT_command("AT+HTTPTERM");
 }
 
@@ -386,36 +392,15 @@ void End_HTTP_Service(void){
 * This function sets up the HTTP address to read from
 ********************************************************************************************************/
 void Set_up_HTTP_Para(void){
-	//send_AT_command("AT+HTTPPARA=URL,http://192.241.210.28:3000/api/image/whoooo"); // setting the httppara, the second parameter is the website you want to access
-	send_AT_command("AT+HTTPPARA=URL,www.sfu.ca");
+	send_AT_command("AT+HTTPPARA=URL,http://192.241.210.28:3000/api/image/whoooo"); // setting the httppara, the second parameter is the website you want to access
+	//send_AT_command("AT+HTTPPARA=URL,www.sfu.ca");
 	//http://192.241.210.28:3000/api/image/whoooo
 	//send_AT_command("AT+HTTPPARA=URL,http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430BaudRateConverter/index.html");
 	//send_AT_command("AT+HTTPPARA=URL,http://www.bcit.ca");
 	send_AT_command("AT+HTTPPARA=CID,1");
 }
 
-uint8_t * request_to_server_secondtime(void){
-	Open_Bearer_Connection();
-		__delay_cycles(DELAY_CHAR_SEND*100);
-	Init_HTTP_Service();
-		__delay_cycles(DELAY_CHAR_SEND*100);
-		Set_up_HTTP_Para();
-			__delay_cycles(DELAY_CHAR_SEND*100);
 
-			//call the action
-			Read_HTTP_Content();
-			__delay_cycles(DELAY_CHAR_SEND*100);
-
-
-			Transmit_HTTP_Read();
-			__delay_cycles(DELAY_CHAR_SEND*100);
-			End_HTTP_Service();
-			__delay_cycles(DELAY_CHAR_SEND*100);
-			Close_Bearer_Connection();
-			__delay_cycles(DELAY_CHAR_SEND*100);
-
-			return HTTPData;
-}
 /* *****************************************************************************************************
 * This function set the GSM module to connect to the internet then connect to the server
 * and grabs the data and store it in the HTTPBuffer array
@@ -431,20 +416,17 @@ uint8_t * request_to_server(void){
 	set_up_bearer_rogers();
 	__delay_cycles(DELAY_CHAR_SEND*100);
 
-	Set_up_HTTP_Para();
-	__delay_cycles(DELAY_CHAR_SEND*100);
-
 	Open_Bearer_Connection();
 	__delay_cycles(DELAY_CHAR_SEND*100);
 	Init_HTTP_Service();
 	__delay_cycles(DELAY_CHAR_SEND*100);
-	//Set_up_HTTP_Para();
-	//__delay_cycles(DELAY_CHAR_SEND*100);
+
+	Set_up_HTTP_Para();
+	__delay_cycles(DELAY_CHAR_SEND*100);
 
 	//call the action
 	Read_HTTP_Content();
 	__delay_cycles(DELAY_CHAR_SEND*100);
-
 
 	Transmit_HTTP_Read();
 	__delay_cycles(DELAY_CHAR_SEND*100);
@@ -456,17 +438,7 @@ uint8_t * request_to_server(void){
 	return HTTPData;
 }
 
-void low_power_mode(void){
-	send_AT_command("AT+CFUN=4");
-}
-
-void full_mode(void){
-	int i=0;
-	send_AT_command("AT+CFUN=1");
-	for(i=0;i<2000;i++)__delay_cycles(DELAY_CHAR_SEND); //delay to connect
-}
-
-
+/*
 void print_http_to_pc(void){
 	int i =0;
 	for(i=0;i<48016;i++){
@@ -474,4 +446,4 @@ void print_http_to_pc(void){
 		//__delay_cycles(DELAY_CHAR_SEND); //delay time before sending the next char
 	}
 }
-
+*/
