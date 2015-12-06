@@ -30,6 +30,8 @@
 #include <SIM800C.h>
 //#include <printf.h>
 
+void get_data_update_display();
+
 
 bool call_server_flag = false;
 
@@ -105,6 +107,31 @@ int main()
 			init_timer32_0();
 		}
 	}
+}
+
+void get_data_update_display() {
+	int counter;
+	uint8_t refreshCmd[3] = {0x24, 0x01, 0x00};
+	uint8_t resetPtrCmd[3] = {0x20, 0x0D, 0x00};
+	uint8_t packetSize = 0xFA;
+	uint8_t *httpchar = 0;
+
+	httpchar = request_to_server();
+	SL_D_sendCmd(resetPtrCmd, 3);
+
+	//Upload header (first 16 bytes)
+	SL_D_uploadImgData(httpchar[0], 0x10);
+
+	for(counter = 16; counter < 48016; counter+=packetSize)
+	{
+		//Upload image after the header
+		//Upload in chunks of 250 bytes
+		//SL_D_uploadImgData(httpchar[counter], packetSize);
+		SL_D_uploadImgData(httpchar + counter, packetSize);
+	}
+
+	//Send refresh display command
+	SL_D_sendCmd(refreshCmd, 3);
 }
 
 
