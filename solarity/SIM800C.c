@@ -10,7 +10,7 @@
 
 
 #define RX_BUFFER_SIZE		1000  //RX_buffer size
-#define DELAY_CHAR_SEND		96000 //delay time of 4 ms = 96000 * (1/24MHz)
+#define DELAY_CHAR_SEND		24000 //delay time of 4 ms = 96000 * (1/24MHz)
 #define HTTP_DATA_BUFFER 	50000
 #define DUMP_CHAR			31
 #define HTTPDATA_SIZE 		48016
@@ -272,11 +272,11 @@ void set_up_bearer_fido(void){
 
 	//delay before sending next command
 	 send_AT_command("AT+SAPBR=3,1,APN,internet.fido.ca");
-	 __delay_cycles(DELAY_CHAR_SEND*100);
+	 //__delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,USER,fido");
-	 __delay_cycles(DELAY_CHAR_SEND*100);
+	 //__delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,PWD,fido");
-	 __delay_cycles(DELAY_CHAR_SEND*100);
+	 //__delay_cycles(DELAY_CHAR_SEND*100);
 }
 
 /* *****************************************************************************************************
@@ -284,11 +284,11 @@ void set_up_bearer_fido(void){
 ********************************************************************************************************/
 void set_up_bearer_rogers(void){
 	 send_AT_command("AT+SAPBR=3,1,APN,internet.com");
-	 __delay_cycles(DELAY_CHAR_SEND*100);
+	 //__delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,USER,wapuser1");
-	 __delay_cycles(DELAY_CHAR_SEND*100);
+	 //__delay_cycles(DELAY_CHAR_SEND*100);
 	 send_AT_command("AT+SAPBR=3,1,PWD,wap");
-	 __delay_cycles(DELAY_CHAR_SEND*100);
+	 //__delay_cycles(DELAY_CHAR_SEND*100);
 }
 
 /* *****************************************************************************************************
@@ -414,26 +414,24 @@ uint8_t * request_to_server(void){
 
 
 	set_up_bearer_rogers();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//__delay_cycles(DELAY_CHAR_SEND*100);
 
 	Open_Bearer_Connection();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	__delay_cycles(DELAY_CHAR_SEND*300);
 	Init_HTTP_Service();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//__delay_cycles(DELAY_CHAR_SEND*100);
 
 	Set_up_HTTP_Para();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//__delay_cycles(DELAY_CHAR_SEND*100);
 
 	//call the action
 	Read_HTTP_Content();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//_delay_cycles(DELAY_CHAR_SEND*100);
 
 	Transmit_HTTP_Read();
-	__delay_cycles(DELAY_CHAR_SEND*100);
+	//__delay_cycles(DELAY_CHAR_SEND*100);
 	End_HTTP_Service();
-	__delay_cycles(DELAY_CHAR_SEND*100);
 	Close_Bearer_Connection();
-	__delay_cycles(DELAY_CHAR_SEND*100);
 
 	return HTTPData;
 }
